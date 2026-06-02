@@ -102,6 +102,81 @@ describe("HTTP gateway adapter", () => {
     });
   });
 
+  it("returns a 405 response for unsupported HTTP methods", () => {
+    expect(
+      handleHttpGatewayRequest(
+        {
+          method: "GET",
+          path: "/v1/chat/completions",
+          headers: {},
+          body: {}
+        },
+        baseConfig
+      )
+    ).toEqual({
+      status: 405,
+      provider: "openai",
+      body: {
+        error: {
+          code: "unsupported_method",
+          message: "Only POST gateway requests are supported."
+        }
+      }
+    });
+  });
+
+  it("returns a 500 response for invalid adapter metadata defaults", () => {
+    expect(
+      handleHttpGatewayRequest(
+        {
+          method: "POST",
+          path: "/v1/chat/completions",
+          headers: {},
+          body: {
+            model: "gpt-4.1-mini",
+            messages: [{ role: "user", content: "Review public architecture notes." }]
+          }
+        },
+        {
+          ...baseConfig,
+          defaultMetadata: {
+            ...baseConfig.defaultMetadata,
+            actorId: ""
+          }
+        }
+      )
+    ).toEqual({
+      status: 500,
+      provider: "openai",
+      body: {
+        error: {
+          code: "invalid_adapter_config",
+          message: "TokenFlow adapter metadata defaults are invalid."
+        }
+      }
+    });
+  });
+
+  it("uses metadata defaults when header overrides are empty", () => {
+    const result = handleHttpGatewayRequest(
+      {
+        method: "POST",
+        path: "/v1/chat/completions",
+        headers: {
+          "x-tokenflow-actor-id": "",
+          "x-tokenflow-team-id": undefined
+        },
+        body: {
+          model: "gpt-4.1-mini",
+          messages: [{ role: "user", content: "Review public architecture notes." }]
+        }
+      },
+      baseConfig
+    );
+
+    expect(result.gateway?.normalizedRequest.metadata).toEqual(baseConfig.defaultMetadata);
+  });
+
   it("returns a 400 response for malformed OpenAI request bodies", () => {
     expect(
       handleHttpGatewayRequest(

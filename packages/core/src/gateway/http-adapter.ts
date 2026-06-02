@@ -51,6 +51,32 @@ export function handleHttpGatewayRequest(
     };
   }
 
+  if (request.method !== "POST") {
+    return {
+      status: 405,
+      provider,
+      body: {
+        error: {
+          code: "unsupported_method",
+          message: "Only POST gateway requests are supported."
+        }
+      }
+    };
+  }
+
+  if (!isValidMetadata(config.defaultMetadata)) {
+    return {
+      status: 500,
+      provider,
+      body: {
+        error: {
+          code: "invalid_adapter_config",
+          message: "TokenFlow adapter metadata defaults are invalid."
+        }
+      }
+    };
+  }
+
   const gateway = tryHandleGatewayRequest({
     provider,
     metadata: metadataFromHeaders(request.headers, config.defaultMetadata),
@@ -147,6 +173,17 @@ function metadataFromHeaders(
       defaults.environment
     )
   };
+}
+
+function isValidMetadata(metadata: TokenFlowMetadata): boolean {
+  return [
+    metadata.actorId,
+    metadata.teamId,
+    metadata.repo,
+    metadata.harness,
+    metadata.taskType,
+    metadata.environment
+  ].every((field) => field.length > 0);
 }
 
 function headerOrDefault(

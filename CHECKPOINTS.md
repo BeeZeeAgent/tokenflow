@@ -586,19 +586,58 @@ Result:
 typecheck passed
 ```
 
-## Next Slice
-
 ### Checkpoint 15: HTTP Adapter Method and Header Validation
 
-Status: pending
+Status: verified
 
 Goal:
 
 Reject unsupported HTTP methods and invalid or empty required TokenFlow metadata defaults with structured errors.
+
+Completed:
+
+- wrote failing unsupported HTTP method test
+- wrote failing invalid adapter metadata default test
+- verified empty metadata header overrides fall back to configured defaults
+- returned structured `405 unsupported_method` responses
+- returned structured `500 invalid_adapter_config` responses
+- performed adapter-level validation before provider request normalization
 
 Files:
 
 ```text
 packages/core/src/gateway/http-adapter.test.ts
 packages/core/src/gateway/http-adapter.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+12 test files passed
+74 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 16: Usage Event Shape
+
+Status: pending
+
+Goal:
+
+Define the first metering event shape emitted by gateway decisions for dashboard and cost analysis.
+
+Files:
+
+```text
+packages/core/src/usage/usage-event.test.ts
+packages/core/src/usage/usage-event.ts
 ```
