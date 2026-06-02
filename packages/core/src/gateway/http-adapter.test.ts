@@ -102,6 +102,61 @@ describe("HTTP gateway adapter", () => {
     });
   });
 
+  it("returns a 400 response for malformed OpenAI request bodies", () => {
+    expect(
+      handleHttpGatewayRequest(
+        {
+          method: "POST",
+          path: "/v1/chat/completions",
+          headers: {},
+          body: {
+            model: "gpt-4.1-mini",
+            messages: [{ role: "user" }]
+          }
+        },
+        baseConfig
+      )
+    ).toEqual({
+      status: 400,
+      provider: "openai",
+      body: {
+        error: {
+          code: "invalid_provider_request",
+          validationCode: "invalid_message_content",
+          message: "Provider request body is invalid."
+        }
+      }
+    });
+  });
+
+  it("returns a 400 response for malformed Anthropic request bodies", () => {
+    expect(
+      handleHttpGatewayRequest(
+        {
+          method: "POST",
+          path: "/v1/messages",
+          headers: {},
+          body: {
+            model: "claude-sonnet-4",
+            system: { text: "not valid" },
+            messages: [{ role: "user", content: "Review public notes." }]
+          }
+        },
+        baseConfig
+      )
+    ).toEqual({
+      status: 400,
+      provider: "anthropic",
+      body: {
+        error: {
+          code: "invalid_provider_request",
+          validationCode: "invalid_system",
+          message: "Provider request body is invalid."
+        }
+      }
+    });
+  });
+
   it("returns a 403 response when policy blocks the request", () => {
     const result = handleHttpGatewayRequest(
       {

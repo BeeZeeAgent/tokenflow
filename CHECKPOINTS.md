@@ -547,15 +547,54 @@ Result:
 typecheck passed
 ```
 
+### Checkpoint 14: HTTP Adapter Validation Errors
+
+Status: verified
+
+Goal:
+
+Return structured HTTP errors for malformed provider request bodies instead of leaking internal exceptions.
+
+Completed:
+
+- wrote failing malformed OpenAI request body test
+- wrote failing malformed Anthropic request body test
+- caught `NormalizeRequestError` inside the HTTP adapter
+- returned structured `400 invalid_provider_request` responses
+- preserved the normalizer validation code in `validationCode`
+- continued rethrowing unknown internal errors
+
+Files:
+
+```text
+packages/core/src/gateway/http-adapter.test.ts
+packages/core/src/gateway/http-adapter.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+12 test files passed
+71 tests passed
+typecheck passed
+```
+
 ## Next Slice
 
-### Checkpoint 14: HTTP Adapter Validation Errors
+### Checkpoint 15: HTTP Adapter Method and Header Validation
 
 Status: pending
 
 Goal:
 
-Return structured HTTP errors for malformed provider request bodies instead of leaking internal exceptions.
+Reject unsupported HTTP methods and invalid or empty required TokenFlow metadata defaults with structured errors.
 
 Files:
 

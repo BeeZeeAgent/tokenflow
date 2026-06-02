@@ -1,4 +1,5 @@
 import { handleGatewayRequest } from "./handle-gateway-request.js";
+import { NormalizeRequestError } from "../normalize/normalize-request.js";
 import type {
   GatewayRequestInput,
   GatewayResponse
@@ -50,7 +51,7 @@ export function handleHttpGatewayRequest(
     };
   }
 
-  const gateway = handleGatewayRequest({
+  const gateway = tryHandleGatewayRequest({
     provider,
     metadata: metadataFromHeaders(request.headers, config.defaultMetadata),
     retention: config.defaultRetention,
@@ -58,6 +59,20 @@ export function handleHttpGatewayRequest(
     rules: config.rules,
     defaultAction: config.defaultAction
   });
+
+  if (gateway instanceof NormalizeRequestError) {
+    return {
+      status: 400,
+      provider,
+      body: {
+        error: {
+          code: "invalid_provider_request",
+          validationCode: gateway.code,
+          message: "Provider request body is invalid."
+        }
+      }
+    };
+  }
 
   if (gateway.decision === "block") {
     return {
@@ -88,6 +103,20 @@ export function handleHttpGatewayRequest(
     body: gateway.upstreamBody,
     gateway
   };
+}
+
+function tryHandleGatewayRequest(
+  input: GatewayRequestInput
+): GatewayResponse | NormalizeRequestError {
+  try {
+    return handleGatewayRequest(input);
+  } catch (error) {
+    if (error instanceof NormalizeRequestError) {
+      return error;
+    }
+
+    throw error;
+  }
 }
 
 function providerFromPath(path: string): Provider | undefined {
