@@ -1,4 +1,5 @@
 export { getHealth } from "./health.js";
+export { handleGatewayRequest } from "./gateway/handle-gateway-request.js";
 export { NormalizeRequestError, normalizeRequest } from "./normalize/normalize-request.js";
 export { evaluatePolicy } from "./policy/evaluate-policy.js";
 export { evaluateRequestPolicy } from "./policy/evaluate-request-policy.js";
@@ -14,6 +15,11 @@ export type {
   RetentionPolicy,
   TokenFlowMetadata
 } from "./normalize/types.js";
+export type {
+  GatewayDecision,
+  GatewayRequestInput,
+  GatewayResponse
+} from "./gateway/handle-gateway-request.js";
 export type {
   EvaluatePolicyInput,
   FindingConfidence,

@@ -460,19 +460,62 @@ Result:
 typecheck passed
 ```
 
-## Next Slice
-
 ### Checkpoint 12: Gateway Request Handler
 
-Status: pending
+Status: verified
 
 Goal:
 
 Normalize provider requests and evaluate request policy in one gateway-facing function.
+
+Completed:
+
+- wrote failing gateway handler tests
+- added a transport-agnostic gateway handler
+- normalized OpenAI-style and Anthropic-style provider bodies
+- evaluated request policy in the same handler
+- returned original upstream body for `allow` and `warn`
+- returned redacted normalized request for `redact`
+- blocked upstream forwarding for `block`
+- exported gateway APIs and types from `@tokenflow/core`
 
 Files:
 
 ```text
 packages/core/src/gateway/handle-gateway-request.test.ts
 packages/core/src/gateway/handle-gateway-request.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+11 test files passed
+62 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 13: HTTP Gateway Adapter Tests
+
+Status: pending
+
+Goal:
+
+Add the first transport adapter that turns HTTP-like request envelopes into gateway handler inputs.
+
+Files:
+
+```text
+packages/core/src/gateway/http-adapter.test.ts
+packages/core/src/gateway/http-adapter.ts
 ```

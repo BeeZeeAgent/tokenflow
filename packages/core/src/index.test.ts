@@ -3,6 +3,7 @@ import {
   evaluatePolicy,
   evaluateRequestPolicy,
   getHealth,
+  handleGatewayRequest,
   NormalizeRequestError,
   normalizeRequest
 } from "./index.js";
@@ -32,5 +33,9 @@ describe("@tokenflow/core entrypoint", () => {
 
   it("exports evaluateRequestPolicy", () => {
     expect(typeof evaluateRequestPolicy).toBe("function");
+  });
+
+  it("exports handleGatewayRequest", () => {
+    expect(typeof handleGatewayRequest).toBe("function");
   });
 });
