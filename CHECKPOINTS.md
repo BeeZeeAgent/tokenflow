@@ -372,19 +372,60 @@ Result:
 typecheck passed
 ```
 
-## Next Slice
-
 ### Checkpoint 10: Policy Decision Basics
 
-Status: pending
+Status: verified
 
 Goal:
 
 Add a first policy layer that can allow, warn, redact, or block based on unified sensitive-data findings.
+
+Completed:
+
+- wrote failing policy decision tests
+- added structural policy finding types compatible with detector findings
+- implemented `allow`, `warn`, `redact`, and `block` decisions
+- added action precedence: block over redact, redact over warn, warn over allow
+- added configurable default action for unmatched findings
+- exported policy APIs and types from `@tokenflow/core`
 
 Files:
 
 ```text
 packages/core/src/policy/evaluate-policy.test.ts
 packages/core/src/policy/evaluate-policy.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+9 test files passed
+47 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 11: Request Policy Pipeline
+
+Status: pending
+
+Goal:
+
+Apply sensitive-data scanning and policy evaluation to normalized request messages.
+
+Files:
+
+```text
+packages/core/src/policy/evaluate-request-policy.test.ts
+packages/core/src/policy/evaluate-request-policy.ts
 ```

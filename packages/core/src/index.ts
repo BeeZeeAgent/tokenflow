@@ -1,5 +1,6 @@
 export { getHealth } from "./health.js";
 export { NormalizeRequestError, normalizeRequest } from "./normalize/normalize-request.js";
+export { evaluatePolicy } from "./policy/evaluate-policy.js";
 export type {
   AnthropicRequestBody,
   MessageRole,
@@ -12,3 +13,13 @@ export type {
   RetentionPolicy,
   TokenFlowMetadata
 } from "./normalize/types.js";
+export type {
+  EvaluatePolicyInput,
+  FindingConfidence,
+  FindingKind,
+  PolicyAction,
+  PolicyDecision,
+  PolicyFinding,
+  PolicyReason,
+  PolicyRule
+} from "./policy/evaluate-policy.js";

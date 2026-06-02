@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getHealth, NormalizeRequestError, normalizeRequest } from "./index.js";
+import {
+  evaluatePolicy,
+  getHealth,
+  NormalizeRequestError,
+  normalizeRequest
+} from "./index.js";
 
 describe("@tokenflow/core entrypoint", () => {
   it("exports getHealth", () => {
@@ -18,5 +23,9 @@ describe("@tokenflow/core entrypoint", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(error.code).toBe("invalid_request");
+  });
+
+  it("exports evaluatePolicy", () => {
+    expect(typeof evaluatePolicy).toBe("function");
   });
 });
