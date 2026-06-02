@@ -295,15 +295,55 @@ typecheck passed
 
 ### Checkpoint 8: Detector Package Entrypoint
 
-Status: pending
+Status: verified
 
 Goal:
 
 Export PII and secrets detector APIs from a stable `@tokenflow/detectors` package entrypoint.
+
+Completed:
+
+- wrote failing package entrypoint tests
+- exported PII detector functions
+- exported secrets detector functions
+- exported PII finding and redaction result types
+- exported secrets finding and redaction result types
 
 Files:
 
 ```text
 packages/detectors/src/index.test.ts
 packages/detectors/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+7 test files passed
+32 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 9: Unified Sensitive Data Scanner
+
+Status: pending
+
+Goal:
+
+Combine PII and secrets findings behind one scanner API for policy layers to consume.
+
+Files:
+
+```text
+packages/detectors/src/sensitive-data.test.ts
+packages/detectors/src/sensitive-data.ts
 ```
