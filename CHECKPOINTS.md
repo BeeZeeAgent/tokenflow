@@ -331,19 +331,60 @@ Result:
 typecheck passed
 ```
 
-## Next Slice
-
 ### Checkpoint 9: Unified Sensitive Data Scanner
 
-Status: pending
+Status: verified
 
 Goal:
 
 Combine PII and secrets findings behind one scanner API for policy layers to consume.
+
+Completed:
+
+- wrote failing unified scanner tests
+- tagged findings with `kind: "pii" | "secret"`
+- merged PII and secrets findings in source order
+- implemented deterministic redaction across mixed finding types
+- kept scanner findings free of raw sensitive values
+- exported scanner functions and types from `@tokenflow/detectors`
 
 Files:
 
 ```text
 packages/detectors/src/sensitive-data.test.ts
 packages/detectors/src/sensitive-data.ts
+packages/detectors/src/index.test.ts
+packages/detectors/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+8 test files passed
+39 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 10: Policy Decision Basics
+
+Status: pending
+
+Goal:
+
+Add a first policy layer that can allow, warn, redact, or block based on unified sensitive-data findings.
+
+Files:
+
+```text
+packages/core/src/policy/evaluate-policy.test.ts
+packages/core/src/policy/evaluate-policy.ts
 ```
