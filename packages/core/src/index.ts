@@ -1,5 +1,6 @@
 export { getHealth } from "./health.js";
 export { handleGatewayRequest } from "./gateway/handle-gateway-request.js";
+export { handleHttpGatewayRequest } from "./gateway/http-adapter.js";
 export { NormalizeRequestError, normalizeRequest } from "./normalize/normalize-request.js";
 export { evaluatePolicy } from "./policy/evaluate-policy.js";
 export { evaluateRequestPolicy } from "./policy/evaluate-request-policy.js";
@@ -20,6 +21,11 @@ export type {
   GatewayRequestInput,
   GatewayResponse
 } from "./gateway/handle-gateway-request.js";
+export type {
+  HttpGatewayAdapterConfig,
+  HttpGatewayRequest,
+  HttpGatewayResponse
+} from "./gateway/http-adapter.js";
 export type {
   EvaluatePolicyInput,
   FindingConfidence,

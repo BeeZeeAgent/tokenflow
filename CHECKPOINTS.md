@@ -503,15 +503,59 @@ Result:
 typecheck passed
 ```
 
+### Checkpoint 13: HTTP Gateway Adapter Tests
+
+Status: verified
+
+Goal:
+
+Add the first transport adapter that turns HTTP-like request envelopes into gateway handler inputs.
+
+Completed:
+
+- wrote failing HTTP adapter tests
+- added framework-neutral HTTP request and response envelope types
+- mapped OpenAI chat completion routes to `provider: "openai"`
+- mapped Anthropic messages routes to `provider: "anthropic"`
+- populated metadata from `x-tokenflow-*` headers with config defaults
+- returned 422 for unsupported routes
+- returned 403 for policy blocks
+- returned redacted normalized request bodies for redaction decisions
+- exported HTTP adapter APIs and types from `@tokenflow/core`
+
+Files:
+
+```text
+packages/core/src/gateway/http-adapter.test.ts
+packages/core/src/gateway/http-adapter.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+12 test files passed
+69 tests passed
+typecheck passed
+```
+
 ## Next Slice
 
-### Checkpoint 13: HTTP Gateway Adapter Tests
+### Checkpoint 14: HTTP Adapter Validation Errors
 
 Status: pending
 
 Goal:
 
-Add the first transport adapter that turns HTTP-like request envelopes into gateway handler inputs.
+Return structured HTTP errors for malformed provider request bodies instead of leaking internal exceptions.
 
 Files:
 
