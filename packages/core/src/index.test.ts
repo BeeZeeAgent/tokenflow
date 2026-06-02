@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   evaluatePolicy,
+  evaluateRequestPolicy,
   getHealth,
   NormalizeRequestError,
   normalizeRequest
@@ -27,5 +28,9 @@ describe("@tokenflow/core entrypoint", () => {
 
   it("exports evaluatePolicy", () => {
     expect(typeof evaluatePolicy).toBe("function");
+  });
+
+  it("exports evaluateRequestPolicy", () => {
+    expect(typeof evaluateRequestPolicy).toBe("function");
   });
 });

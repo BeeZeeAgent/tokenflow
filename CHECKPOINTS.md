@@ -413,19 +413,66 @@ Result:
 typecheck passed
 ```
 
-## Next Slice
-
 ### Checkpoint 11: Request Policy Pipeline
 
-Status: pending
+Status: verified
 
 Goal:
 
 Apply sensitive-data scanning and policy evaluation to normalized request messages.
 
+Completed:
+
+- wrote failing request policy pipeline tests
+- added `@tokenflow/core` dependency on `@tokenflow/detectors`
+- added detector package entry metadata for package-level resolution
+- scanned normalized message text with the unified sensitive-data scanner
+- attached message index and role metadata to policy findings
+- skipped raw-prompt-omitted placeholders
+- applied policy action precedence across request messages
+- returned a redacted normalized request when the final action is `redact`
+- exported request policy APIs and types from `@tokenflow/core`
+
 Files:
 
 ```text
+packages/core/package.json
 packages/core/src/policy/evaluate-request-policy.test.ts
 packages/core/src/policy/evaluate-request-policy.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
+packages/detectors/package.json
+pnpm-lock.yaml
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+10 test files passed
+55 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 12: Gateway Request Handler
+
+Status: pending
+
+Goal:
+
+Normalize provider requests and evaluate request policy in one gateway-facing function.
+
+Files:
+
+```text
+packages/core/src/gateway/handle-gateway-request.test.ts
+packages/core/src/gateway/handle-gateway-request.ts
 ```
