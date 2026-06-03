@@ -672,11 +672,21 @@ typecheck passed
 
 ### Checkpoint 17: Gateway Usage Event Emission
 
-Status: pending
+Status: verified
 
 Goal:
 
 Attach usage event creation to the gateway-facing flow so HTTP/API callers can receive safe usage metadata alongside policy decisions.
+
+Completed:
+
+- wrote failing gateway usage event emission tests
+- added optional `usage` context to `handleGatewayRequest`
+- attached safe `usageEvent` objects to gateway responses when usage context is provided
+- passed HTTP adapter usage context through to the gateway
+- derived HTTP usage request ids from `x-tokenflow-request-id`
+- kept upstream provider bodies and error responses unchanged
+- exported gateway and HTTP usage context types from `@tokenflow/core`
 
 Files:
 
@@ -685,4 +695,39 @@ packages/core/src/gateway/handle-gateway-request.test.ts
 packages/core/src/gateway/handle-gateway-request.ts
 packages/core/src/gateway/http-adapter.test.ts
 packages/core/src/gateway/http-adapter.ts
+packages/core/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+13 test files passed
+81 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 18: Usage Cost Estimation
+
+Status: pending
+
+Goal:
+
+Estimate usage event costs from model pricing configuration while preserving explicit unknown-price behavior.
+
+Files:
+
+```text
+packages/core/src/usage/usage-cost.test.ts
+packages/core/src/usage/usage-cost.ts
+packages/core/src/usage/usage-event.test.ts
+packages/core/src/usage/usage-event.ts
 ```

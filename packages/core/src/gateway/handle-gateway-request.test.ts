@@ -134,6 +134,55 @@ describe("handleGatewayRequest", () => {
     ]);
   });
 
+  it("emits a safe usage event when usage context is provided", () => {
+    const result = handleGatewayRequest({
+      ...baseInput,
+      body: {
+        model: "gpt-4.1-mini",
+        messages: [{ role: "user", content: "Email jane@example.com." }]
+      },
+      rules: [{ category: "email", action: "warn" }],
+      usage: {
+        requestId: "req-1",
+        occurredAt: "2026-06-03T12:10:00.000Z",
+        latencyMs: 31,
+        tokenUsage: {
+          inputTokens: 12,
+          outputTokens: 8,
+          cachedTokens: 2
+        }
+      }
+    });
+
+    expect(result.usageEvent).toEqual({
+      type: "usage",
+      requestId: "req-1",
+      occurredAt: "2026-06-03T12:10:00.000Z",
+      provider: "openai",
+      model: "gpt-4.1-mini",
+      metadata: baseInput.metadata,
+      decision: "warn",
+      inputTokens: 12,
+      outputTokens: 8,
+      cachedTokens: 2,
+      totalTokens: 20,
+      latencyMs: 31,
+      estimatedCostUsd: null,
+      actualCostUsd: null,
+      policy: {
+        findingCount: 1,
+        findingsByKind: {
+          pii: 1,
+          secret: 0
+        },
+        findingsByCategory: {
+          email: 1
+        }
+      }
+    });
+    expect(JSON.stringify(result.usageEvent)).not.toContain("jane@example.com");
+  });
+
   it("exports gateway types", () => {
     expectTypeOf<GatewayDecision>().toEqualTypeOf<"allow" | "warn" | "redact" | "block">();
     expectTypeOf<GatewayRequestInput>().toMatchTypeOf<{
@@ -143,6 +192,11 @@ describe("handleGatewayRequest", () => {
         messages: Array<{ role: string; content: string }>;
       };
       rules: Array<{ category: string; action: GatewayDecision }>;
+      usage?: {
+        requestId: string;
+        occurredAt: string;
+        latencyMs: number;
+      };
     }>();
     expectTypeOf<GatewayResponse>().toMatchTypeOf<{
       decision: GatewayDecision;
@@ -150,6 +204,7 @@ describe("handleGatewayRequest", () => {
       policy: unknown;
       upstreamBody?: unknown;
       redactedRequest?: unknown;
+      usageEvent?: unknown;
     }>();
   });
 });

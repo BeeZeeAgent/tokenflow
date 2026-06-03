@@ -2,7 +2,8 @@ import { handleGatewayRequest } from "./handle-gateway-request.js";
 import { NormalizeRequestError } from "../normalize/normalize-request.js";
 import type {
   GatewayRequestInput,
-  GatewayResponse
+  GatewayResponse,
+  GatewayUsageInput
 } from "./handle-gateway-request.js";
 import type { PolicyRule } from "../policy/evaluate-policy.js";
 import type {
@@ -16,7 +17,10 @@ export type HttpGatewayRequest = {
   path: string;
   headers: Record<string, string | undefined>;
   body: unknown;
+  usage?: HttpGatewayUsageInput;
 };
+
+export type HttpGatewayUsageInput = Omit<GatewayUsageInput, "requestId">;
 
 export type HttpGatewayAdapterConfig = {
   defaultMetadata: TokenFlowMetadata;
@@ -83,7 +87,8 @@ export function handleHttpGatewayRequest(
     retention: config.defaultRetention,
     body: request.body as GatewayRequestInput["body"],
     rules: config.rules,
-    defaultAction: config.defaultAction
+    defaultAction: config.defaultAction,
+    usage: usageFromRequest(request)
   });
 
   if (gateway instanceof NormalizeRequestError) {
@@ -194,4 +199,21 @@ function headerOrDefault(
   const value = headers[name];
 
   return value && value.length > 0 ? value : defaultValue;
+}
+
+function usageFromRequest(
+  request: HttpGatewayRequest
+): GatewayRequestInput["usage"] | undefined {
+  if (!request.usage) {
+    return undefined;
+  }
+
+  return {
+    ...request.usage,
+    requestId: headerOrDefault(
+      request.headers,
+      "x-tokenflow-request-id",
+      "unknown-request"
+    )
+  };
 }

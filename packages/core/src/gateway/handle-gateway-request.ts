@@ -10,14 +10,22 @@ import type {
   RequestPolicyDecision
 } from "../policy/evaluate-request-policy.js";
 import type { PolicyRule } from "../policy/evaluate-policy.js";
+import { createUsageEvent } from "../usage/usage-event.js";
+import type {
+  UsageEvent,
+  UsageEventInput
+} from "../usage/usage-event.js";
 
 export type GatewayDecision = "allow" | "warn" | "redact" | "block";
+
+export type GatewayUsageInput = Omit<UsageEventInput, "gateway">;
 
 export type GatewayRequestInput = NormalizeRequestInput & {
   metadata: TokenFlowMetadata;
   retention: RetentionPolicy;
   rules: PolicyRule[];
   defaultAction?: "warn" | "redact" | "block";
+  usage?: GatewayUsageInput;
 };
 
 export type GatewayResponse = {
@@ -26,6 +34,7 @@ export type GatewayResponse = {
   policy: RequestPolicyDecision;
   upstreamBody?: NormalizeRequestInput["body"];
   redactedRequest?: NormalizedRequest;
+  usageEvent?: UsageEvent;
 };
 
 export function handleGatewayRequest(input: GatewayRequestInput): GatewayResponse {
@@ -37,26 +46,43 @@ export function handleGatewayRequest(input: GatewayRequestInput): GatewayRespons
   });
 
   if (policy.action === "block") {
-    return {
+    return withUsageEvent(input, {
       decision: "block",
       normalizedRequest,
       policy
-    };
+    });
   }
 
   if (policy.action === "redact") {
-    return {
+    return withUsageEvent(input, {
       decision: "redact",
       normalizedRequest,
       policy,
       redactedRequest: policy.redactedRequest
-    };
+    });
   }
 
-  return {
+  return withUsageEvent(input, {
     decision: policy.action,
     normalizedRequest,
     policy,
     upstreamBody: input.body
+  });
+}
+
+function withUsageEvent(
+  input: GatewayRequestInput,
+  response: GatewayResponse
+): GatewayResponse {
+  if (!input.usage) {
+    return response;
+  }
+
+  return {
+    ...response,
+    usageEvent: createUsageEvent({
+      ...input.usage,
+      gateway: response
+    })
   };
 }

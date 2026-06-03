@@ -292,12 +292,55 @@ describe("HTTP gateway adapter", () => {
     });
   });
 
+  it("passes HTTP usage context into the gateway usage event", () => {
+    const result = handleHttpGatewayRequest(
+      {
+        method: "POST",
+        path: "/v1/chat/completions",
+        headers: {
+          "x-tokenflow-request-id": "req-http-1"
+        },
+        body: {
+          model: "gpt-4.1-mini",
+          messages: [{ role: "user", content: "Review public architecture notes." }]
+        },
+        usage: {
+          occurredAt: "2026-06-03T12:11:00.000Z",
+          latencyMs: 17,
+          tokenUsage: {
+            inputTokens: 5,
+            outputTokens: 3
+          }
+        }
+      },
+      baseConfig
+    );
+
+    expect(result.gateway?.usageEvent).toMatchObject({
+      type: "usage",
+      requestId: "req-http-1",
+      occurredAt: "2026-06-03T12:11:00.000Z",
+      provider: "openai",
+      model: "gpt-4.1-mini",
+      decision: "allow",
+      inputTokens: 5,
+      outputTokens: 3,
+      cachedTokens: 0,
+      totalTokens: 8,
+      latencyMs: 17
+    });
+  });
+
   it("exports HTTP adapter types", () => {
     expectTypeOf<HttpGatewayRequest>().toMatchTypeOf<{
       method: string;
       path: string;
       headers: Record<string, string | undefined>;
       body: unknown;
+      usage?: {
+        occurredAt: string;
+        latencyMs: number;
+      };
     }>();
     expectTypeOf<HttpGatewayAdapterConfig>().toMatchTypeOf<{
       defaultMetadata: {

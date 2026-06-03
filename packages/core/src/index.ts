@@ -20,12 +20,14 @@ export type {
 export type {
   GatewayDecision,
   GatewayRequestInput,
-  GatewayResponse
+  GatewayResponse,
+  GatewayUsageInput
 } from "./gateway/handle-gateway-request.js";
 export type {
   HttpGatewayAdapterConfig,
   HttpGatewayRequest,
-  HttpGatewayResponse
+  HttpGatewayResponse,
+  HttpGatewayUsageInput
 } from "./gateway/http-adapter.js";
 export type {
   EvaluatePolicyInput,
