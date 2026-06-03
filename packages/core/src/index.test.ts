@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   evaluatePolicy,
   evaluateRequestPolicy,
+  estimateUsageCost,
   getHealth,
   handleGatewayRequest,
   handleHttpGatewayRequest,
@@ -47,5 +48,9 @@ describe("@tokenflow/core entrypoint", () => {
 
   it("exports createUsageEvent", () => {
     expect(typeof createUsageEvent).toBe("function");
+  });
+
+  it("exports estimateUsageCost", () => {
+    expect(typeof estimateUsageCost).toBe("function");
   });
 });

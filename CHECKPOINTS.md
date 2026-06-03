@@ -717,17 +717,63 @@ typecheck passed
 
 ### Checkpoint 18: Usage Cost Estimation
 
-Status: pending
+Status: verified
 
 Goal:
 
 Estimate usage event costs from model pricing configuration while preserving explicit unknown-price behavior.
+
+Completed:
+
+- wrote failing cost estimation tests
+- added per-million-token model pricing types
+- estimated uncached input, cached input, output, and total USD cost
+- returned explicit `missing_model_pricing` unknown results when pricing is absent
+- integrated pricing-based estimates into `createUsageEvent`
+- preserved explicit `estimatedCostUsd` overrides
+- exported cost estimator APIs and types from `@tokenflow/core`
 
 Files:
 
 ```text
 packages/core/src/usage/usage-cost.test.ts
 packages/core/src/usage/usage-cost.ts
+packages/core/src/usage/usage-event.test.ts
+packages/core/src/usage/usage-event.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+14 test files passed
+88 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 19: Usage Spike Detection
+
+Status: pending
+
+Goal:
+
+Emit deterministic spike metadata when usage crosses configured token or cost thresholds.
+
+Files:
+
+```text
+packages/core/src/usage/usage-spike.test.ts
+packages/core/src/usage/usage-spike.ts
 packages/core/src/usage/usage-event.test.ts
 packages/core/src/usage/usage-event.ts
 ```

@@ -6,6 +6,8 @@ import type {
   Provider,
   TokenFlowMetadata
 } from "../normalize/types.js";
+import { estimateUsageCost } from "./usage-cost.js";
+import type { UsageModelPricing } from "./usage-cost.js";
 
 export type UsageTokenCounts = {
   inputTokens?: number;
@@ -19,6 +21,7 @@ export type UsageEventInput = {
   gateway: GatewayResponse;
   latencyMs: number;
   tokenUsage?: UsageTokenCounts;
+  pricing?: UsageModelPricing[];
   estimatedCostUsd?: number;
   actualCostUsd?: number;
 };
@@ -52,6 +55,9 @@ export function createUsageEvent(input: UsageEventInput): UsageEvent {
   const inputTokens = input.tokenUsage?.inputTokens ?? 0;
   const outputTokens = input.tokenUsage?.outputTokens ?? 0;
   const cachedTokens = input.tokenUsage?.cachedTokens ?? 0;
+  const estimatedCostUsd =
+    input.estimatedCostUsd ??
+    estimateCostFromPricing(input, inputTokens, outputTokens, cachedTokens);
 
   return {
     type: "usage",
@@ -66,10 +72,32 @@ export function createUsageEvent(input: UsageEventInput): UsageEvent {
     cachedTokens,
     totalTokens: inputTokens + outputTokens,
     latencyMs: input.latencyMs,
-    estimatedCostUsd: input.estimatedCostUsd ?? null,
+    estimatedCostUsd,
     actualCostUsd: input.actualCostUsd ?? null,
     policy: summarizePolicyFindings(input.gateway.policy.findings)
   };
+}
+
+function estimateCostFromPricing(
+  input: UsageEventInput,
+  inputTokens: number,
+  outputTokens: number,
+  cachedTokens: number
+): number | null {
+  if (!input.pricing) {
+    return null;
+  }
+
+  const estimate = estimateUsageCost({
+    provider: input.gateway.normalizedRequest.provider,
+    model: input.gateway.normalizedRequest.model,
+    inputTokens,
+    outputTokens,
+    cachedTokens,
+    pricing: input.pricing
+  });
+
+  return estimate.estimatedCostUsd;
 }
 
 function summarizePolicyFindings(

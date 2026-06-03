@@ -109,10 +109,51 @@ describe("usage event", () => {
     });
   });
 
+  it("estimates cost from pricing when explicit estimated cost is not provided", () => {
+    expect(
+      createUsageEvent({
+        requestId: "req-3",
+        occurredAt: "2026-06-03T12:02:00.000Z",
+        gateway,
+        latencyMs: 5,
+        tokenUsage: {
+          inputTokens: 1_000_000,
+          outputTokens: 500_000,
+          cachedTokens: 250_000
+        },
+        pricing: [
+          {
+            provider: "openai",
+            model: "gpt-4.1-mini",
+            inputUsdPerMillionTokens: 0.4,
+            outputUsdPerMillionTokens: 1.6,
+            cachedInputUsdPerMillionTokens: 0.1
+          }
+        ]
+      }).estimatedCostUsd
+    ).toBe(1.125);
+  });
+
+  it("keeps estimated cost unknown when pricing is not configured", () => {
+    expect(
+      createUsageEvent({
+        requestId: "req-4",
+        occurredAt: "2026-06-03T12:03:00.000Z",
+        gateway,
+        latencyMs: 5,
+        tokenUsage: {
+          inputTokens: 1_000,
+          outputTokens: 500
+        },
+        pricing: []
+      }).estimatedCostUsd
+    ).toBeNull();
+  });
+
   it("does not include raw prompt text or raw sensitive values", () => {
     const event = createUsageEvent({
-      requestId: "req-3",
-      occurredAt: "2026-06-03T12:02:00.000Z",
+      requestId: "req-5",
+      occurredAt: "2026-06-03T12:04:00.000Z",
       gateway,
       latencyMs: 3
     });
@@ -134,6 +175,10 @@ describe("usage event", () => {
         outputTokens?: number;
         cachedTokens?: number;
       };
+      pricing?: Array<{
+        provider: "openai" | "anthropic";
+        model: string;
+      }>;
     }>();
     expectTypeOf<UsageEvent>().toMatchTypeOf<{
       type: "usage";
