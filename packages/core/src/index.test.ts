@@ -6,7 +6,8 @@ import {
   handleGatewayRequest,
   handleHttpGatewayRequest,
   NormalizeRequestError,
-  normalizeRequest
+  normalizeRequest,
+  createUsageEvent
 } from "./index.js";
 
 describe("@tokenflow/core entrypoint", () => {
@@ -42,5 +43,9 @@ describe("@tokenflow/core entrypoint", () => {
 
   it("exports handleHttpGatewayRequest", () => {
     expect(typeof handleHttpGatewayRequest).toBe("function");
+  });
+
+  it("exports createUsageEvent", () => {
+    expect(typeof createUsageEvent).toBe("function");
   });
 });

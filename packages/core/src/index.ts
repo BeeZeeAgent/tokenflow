@@ -4,6 +4,7 @@ export { handleHttpGatewayRequest } from "./gateway/http-adapter.js";
 export { NormalizeRequestError, normalizeRequest } from "./normalize/normalize-request.js";
 export { evaluatePolicy } from "./policy/evaluate-policy.js";
 export { evaluateRequestPolicy } from "./policy/evaluate-request-policy.js";
+export { createUsageEvent } from "./usage/usage-event.js";
 export type {
   AnthropicRequestBody,
   MessageRole,
@@ -41,3 +42,8 @@ export type {
   RequestPolicyDecision,
   RequestPolicyFinding
 } from "./policy/evaluate-request-policy.js";
+export type {
+  UsageEvent,
+  UsageEventInput,
+  UsageTokenCounts
+} from "./usage/usage-event.js";

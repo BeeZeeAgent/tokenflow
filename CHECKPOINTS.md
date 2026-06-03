@@ -629,15 +629,60 @@ typecheck passed
 
 ### Checkpoint 16: Usage Event Shape
 
-Status: pending
+Status: verified
 
 Goal:
 
 Define the first metering event shape emitted by gateway decisions for dashboard and cost analysis.
+
+Completed:
+
+- wrote failing usage event shape tests
+- added a dashboard-safe `createUsageEvent` builder
+- attributed usage to provider, model, actor, team, repo, harness, task type, and environment
+- recorded gateway decision, latency, token counts, cost placeholders, and policy finding summaries
+- kept usage events free of raw prompt text and raw sensitive values
+- exported usage event APIs and types from `@tokenflow/core`
 
 Files:
 
 ```text
 packages/core/src/usage/usage-event.test.ts
 packages/core/src/usage/usage-event.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+13 test files passed
+79 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 17: Gateway Usage Event Emission
+
+Status: pending
+
+Goal:
+
+Attach usage event creation to the gateway-facing flow so HTTP/API callers can receive safe usage metadata alongside policy decisions.
+
+Files:
+
+```text
+packages/core/src/gateway/handle-gateway-request.test.ts
+packages/core/src/gateway/handle-gateway-request.ts
+packages/core/src/gateway/http-adapter.test.ts
+packages/core/src/gateway/http-adapter.ts
 ```
