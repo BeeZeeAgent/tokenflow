@@ -150,10 +150,67 @@ describe("usage event", () => {
     ).toBeNull();
   });
 
+  it("attaches spike metadata when thresholds are crossed", () => {
+    expect(
+      createUsageEvent({
+        requestId: "req-5",
+        occurredAt: "2026-06-03T12:04:00.000Z",
+        gateway,
+        latencyMs: 5,
+        tokenUsage: {
+          inputTokens: 1_000,
+          outputTokens: 250
+        },
+        estimatedCostUsd: 2.5,
+        spikeThresholds: {
+          totalTokens: 1_000,
+          estimatedCostUsd: 2
+        }
+      }).spike
+    ).toEqual({
+      triggered: true,
+      reasons: [
+        {
+          code: "total_tokens_threshold_exceeded",
+          observed: 1_250,
+          threshold: 1_000
+        },
+        {
+          code: "estimated_cost_threshold_exceeded",
+          observed: 2.5,
+          threshold: 2
+        }
+      ]
+    });
+  });
+
+  it("attaches non-triggered spike metadata when thresholds are configured but not crossed", () => {
+    expect(
+      createUsageEvent({
+        requestId: "req-6",
+        occurredAt: "2026-06-03T12:05:00.000Z",
+        gateway,
+        latencyMs: 5,
+        tokenUsage: {
+          inputTokens: 100,
+          outputTokens: 50
+        },
+        estimatedCostUsd: 0.1,
+        spikeThresholds: {
+          totalTokens: 1_000,
+          estimatedCostUsd: 2
+        }
+      }).spike
+    ).toEqual({
+      triggered: false,
+      reasons: []
+    });
+  });
+
   it("does not include raw prompt text or raw sensitive values", () => {
     const event = createUsageEvent({
-      requestId: "req-5",
-      occurredAt: "2026-06-03T12:04:00.000Z",
+      requestId: "req-7",
+      occurredAt: "2026-06-03T12:06:00.000Z",
       gateway,
       latencyMs: 3
     });
@@ -179,6 +236,10 @@ describe("usage event", () => {
         provider: "openai" | "anthropic";
         model: string;
       }>;
+      spikeThresholds?: {
+        totalTokens?: number;
+        estimatedCostUsd?: number;
+      };
     }>();
     expectTypeOf<UsageEvent>().toMatchTypeOf<{
       type: "usage";
@@ -187,6 +248,9 @@ describe("usage event", () => {
       model: string;
       decision: "allow" | "warn" | "redact" | "block";
       totalTokens: number;
+      spike?: {
+        triggered: boolean;
+      };
     }>();
   });
 });

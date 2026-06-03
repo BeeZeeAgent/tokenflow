@@ -8,6 +8,11 @@ import type {
 } from "../normalize/types.js";
 import { estimateUsageCost } from "./usage-cost.js";
 import type { UsageModelPricing } from "./usage-cost.js";
+import { detectUsageSpike } from "./usage-spike.js";
+import type {
+  UsageSpike,
+  UsageSpikeThresholds
+} from "./usage-spike.js";
 
 export type UsageTokenCounts = {
   inputTokens?: number;
@@ -22,6 +27,7 @@ export type UsageEventInput = {
   latencyMs: number;
   tokenUsage?: UsageTokenCounts;
   pricing?: UsageModelPricing[];
+  spikeThresholds?: UsageSpikeThresholds;
   estimatedCostUsd?: number;
   actualCostUsd?: number;
 };
@@ -41,6 +47,7 @@ export type UsageEvent = {
   latencyMs: number;
   estimatedCostUsd: number | null;
   actualCostUsd: number | null;
+  spike?: UsageSpike;
   policy: {
     findingCount: number;
     findingsByKind: {
@@ -58,8 +65,9 @@ export function createUsageEvent(input: UsageEventInput): UsageEvent {
   const estimatedCostUsd =
     input.estimatedCostUsd ??
     estimateCostFromPricing(input, inputTokens, outputTokens, cachedTokens);
+  const totalTokens = inputTokens + outputTokens;
 
-  return {
+  const event: UsageEvent = {
     type: "usage",
     requestId: input.requestId,
     occurredAt: input.occurredAt,
@@ -70,11 +78,24 @@ export function createUsageEvent(input: UsageEventInput): UsageEvent {
     inputTokens,
     outputTokens,
     cachedTokens,
-    totalTokens: inputTokens + outputTokens,
+    totalTokens,
     latencyMs: input.latencyMs,
     estimatedCostUsd,
     actualCostUsd: input.actualCostUsd ?? null,
     policy: summarizePolicyFindings(input.gateway.policy.findings)
+  };
+
+  if (!input.spikeThresholds) {
+    return event;
+  }
+
+  return {
+    ...event,
+    spike: detectUsageSpike({
+      totalTokens,
+      estimatedCostUsd,
+      thresholds: input.spikeThresholds
+    })
   };
 }
 

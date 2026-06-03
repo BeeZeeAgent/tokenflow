@@ -8,7 +8,8 @@ import {
   handleHttpGatewayRequest,
   NormalizeRequestError,
   normalizeRequest,
-  createUsageEvent
+  createUsageEvent,
+  detectUsageSpike
 } from "./index.js";
 
 describe("@tokenflow/core entrypoint", () => {
@@ -52,5 +53,9 @@ describe("@tokenflow/core entrypoint", () => {
 
   it("exports estimateUsageCost", () => {
     expect(typeof estimateUsageCost).toBe("function");
+  });
+
+  it("exports detectUsageSpike", () => {
+    expect(typeof detectUsageSpike).toBe("function");
   });
 });

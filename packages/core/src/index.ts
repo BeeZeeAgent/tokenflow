@@ -6,6 +6,7 @@ export { evaluatePolicy } from "./policy/evaluate-policy.js";
 export { evaluateRequestPolicy } from "./policy/evaluate-request-policy.js";
 export { estimateUsageCost } from "./usage/usage-cost.js";
 export { createUsageEvent } from "./usage/usage-event.js";
+export { detectUsageSpike } from "./usage/usage-spike.js";
 export type {
   AnthropicRequestBody,
   MessageRole,
@@ -55,3 +56,10 @@ export type {
   UsageEventInput,
   UsageTokenCounts
 } from "./usage/usage-event.js";
+export type {
+  DetectUsageSpikeInput,
+  UsageSpike,
+  UsageSpikeReason,
+  UsageSpikeReasonCode,
+  UsageSpikeThresholds
+} from "./usage/usage-spike.js";

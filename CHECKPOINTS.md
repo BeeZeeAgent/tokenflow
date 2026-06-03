@@ -763,11 +763,20 @@ typecheck passed
 
 ### Checkpoint 19: Usage Spike Detection
 
-Status: pending
+Status: verified
 
 Goal:
 
 Emit deterministic spike metadata when usage crosses configured token or cost thresholds.
+
+Completed:
+
+- wrote failing usage spike detection tests
+- added token and estimated-cost threshold types
+- emitted deterministic spike reasons in token-first, cost-second order
+- ignored unknown estimated costs for cost threshold checks
+- attached optional spike metadata to usage events when thresholds are configured
+- exported spike detection APIs and types from `@tokenflow/core`
 
 Files:
 
@@ -776,4 +785,40 @@ packages/core/src/usage/usage-spike.test.ts
 packages/core/src/usage/usage-spike.ts
 packages/core/src/usage/usage-event.test.ts
 packages/core/src/usage/usage-event.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+15 test files passed
+97 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 20: Usage Meter Facade
+
+Status: pending
+
+Goal:
+
+Provide one usage-metering function that creates usage events with pricing and spike thresholds from a stable input shape.
+
+Files:
+
+```text
+packages/core/src/usage/usage-meter.test.ts
+packages/core/src/usage/usage-meter.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
 ```
