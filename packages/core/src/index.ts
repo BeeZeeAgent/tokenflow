@@ -23,10 +23,12 @@ export type {
   GatewayDecision,
   GatewayRequestInput,
   GatewayResponse,
-  GatewayUsageInput
+  GatewayUsageInput,
+  HarnessRolloutMode
 } from "./gateway/handle-gateway-request.js";
 export type {
   HttpGatewayAdapterConfig,
+  HttpGatewayHarnessConfig,
   HttpGatewayRequest,
   HttpGatewayResponse,
   HttpGatewayUsageInput

@@ -331,6 +331,74 @@ describe("HTTP gateway adapter", () => {
     });
   });
 
+  it("uses configured rollout mode for the request harness", () => {
+    const body = {
+      model: "gpt-4.1-mini",
+      messages: [{ role: "user", content: "Email jane@example.com." }]
+    };
+
+    const result = handleHttpGatewayRequest(
+      {
+        method: "POST",
+        path: "/v1/chat/completions",
+        headers: {
+          "x-tokenflow-harness": "codex"
+        },
+        body
+      },
+      {
+        ...baseConfig,
+        rules: [{ category: "email", action: "block" }],
+        harnesses: {
+          codex: {
+            rolloutMode: "observe"
+          }
+        }
+      }
+    );
+
+    expect(result.status).toBe(200);
+    expect(result.body).toBe(body);
+    expect(result.gateway).toMatchObject({
+      rolloutMode: "observe",
+      decision: "observe",
+      observedDecision: "block"
+    });
+  });
+
+  it("uses the default rollout mode when a harness has no override", () => {
+    const body = {
+      model: "gpt-4.1-mini",
+      messages: [{ role: "user", content: "Email jane@example.com." }]
+    };
+
+    const result = handleHttpGatewayRequest(
+      {
+        method: "POST",
+        path: "/v1/chat/completions",
+        headers: {
+          "x-tokenflow-harness": "unknown-harness"
+        },
+        body
+      },
+      {
+        ...baseConfig,
+        rules: [{ category: "email", action: "block" }],
+        defaultRolloutMode: "off"
+      }
+    );
+
+    expect(result.status).toBe(200);
+    expect(result.body).toBe(body);
+    expect(result.gateway).toMatchObject({
+      rolloutMode: "off",
+      decision: "allow",
+      policy: {
+        findings: []
+      }
+    });
+  });
+
   it("exports HTTP adapter types", () => {
     expectTypeOf<HttpGatewayRequest>().toMatchTypeOf<{
       method: string;
@@ -356,6 +424,13 @@ describe("HTTP gateway adapter", () => {
         storeRawToolOutput: boolean;
       };
       rules: Array<{ category: string; action: "allow" | "warn" | "redact" | "block" }>;
+      defaultRolloutMode?: "off" | "observe" | "enforce";
+      harnesses?: Record<
+        string,
+        {
+          rolloutMode: "off" | "observe" | "enforce";
+        }
+      >;
     }>();
     expectTypeOf<HttpGatewayResponse>().toMatchTypeOf<{
       status: number;

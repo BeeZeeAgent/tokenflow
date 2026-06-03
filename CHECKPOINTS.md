@@ -806,19 +806,65 @@ typecheck passed
 
 ## Next Slice
 
-### Checkpoint 20: Usage Meter Facade
+### Checkpoint 20: Harness Rollout Modes
+
+Status: verified
+
+Goal:
+
+Add global per-harness rollout modes so TokenFlow can be turned off, observed, or enforced while measuring policy impact.
+
+Completed:
+
+- wrote failing rollout-mode tests for gateway and HTTP adapter behavior
+- added `off`, `observe`, and `enforce` rollout modes
+- kept `enforce` as the default behavior
+- made `off` mode bypass policy scanning and forward original provider bodies
+- made `observe` mode scan and report would-be policy decisions without blocking or redacting upstream traffic
+- added per-harness HTTP adapter rollout overrides with a global default mode
+- exported rollout configuration types from `@tokenflow/core`
+
+Files:
+
+```text
+packages/core/src/gateway/handle-gateway-request.test.ts
+packages/core/src/gateway/handle-gateway-request.ts
+packages/core/src/gateway/http-adapter.test.ts
+packages/core/src/gateway/http-adapter.ts
+packages/core/src/index.test.ts
+packages/core/src/index.ts
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+15 test files passed
+102 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 21: HTTP Proxy App Skeleton
 
 Status: pending
 
 Goal:
 
-Provide one usage-metering function that creates usage events with pricing and spike thresholds from a stable input shape.
+Create a runnable HTTP proxy app that accepts OpenAI and Anthropic-compatible gateway routes and delegates request handling to the core HTTP adapter.
 
 Files:
 
 ```text
-packages/core/src/usage/usage-meter.test.ts
-packages/core/src/usage/usage-meter.ts
-packages/core/src/index.test.ts
-packages/core/src/index.ts
+apps/api/package.json
+apps/api/src/app.test.ts
+apps/api/src/app.ts
+apps/api/src/server.ts
 ```

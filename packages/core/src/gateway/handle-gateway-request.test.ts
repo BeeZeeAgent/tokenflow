@@ -3,7 +3,8 @@ import { handleGatewayRequest } from "./handle-gateway-request.js";
 import type {
   GatewayDecision,
   GatewayRequestInput,
-  GatewayResponse
+  GatewayResponse,
+  HarnessRolloutMode
 } from "./handle-gateway-request.js";
 
 const baseInput = {
@@ -37,6 +38,7 @@ describe("handleGatewayRequest", () => {
       })
     ).toEqual({
       decision: "allow",
+      rolloutMode: "enforce",
       upstreamBody: body,
       normalizedRequest: {
         provider: "openai",
@@ -183,8 +185,75 @@ describe("handleGatewayRequest", () => {
     expect(JSON.stringify(result.usageEvent)).not.toContain("jane@example.com");
   });
 
+  it("bypasses policy scanning in off mode and forwards the original body", () => {
+    const body = {
+      model: "gpt-4.1-mini",
+      messages: [{ role: "user", content: "Email jane@example.com." }]
+    } satisfies GatewayRequestInput["body"];
+
+    const result = handleGatewayRequest({
+      ...baseInput,
+      body,
+      rules: [{ category: "email", action: "block" }],
+      rolloutMode: "off"
+    });
+
+    expect(result.rolloutMode).toBe("off");
+    expect(result.decision).toBe("allow");
+    expect(result.upstreamBody).toBe(body);
+    expect(result.policy.findings).toEqual([]);
+    expect(result.policy.reasons).toEqual([]);
+  });
+
+  it("observes policy findings without enforcing redaction", () => {
+    const body = {
+      model: "gpt-4.1-mini",
+      messages: [{ role: "user", content: "Email jane@example.com." }]
+    } satisfies GatewayRequestInput["body"];
+
+    const result = handleGatewayRequest({
+      ...baseInput,
+      body,
+      rules: [{ category: "email", action: "redact" }],
+      rolloutMode: "observe"
+    });
+
+    expect(result.rolloutMode).toBe("observe");
+    expect(result.decision).toBe("observe");
+    expect(result.observedDecision).toBe("redact");
+    expect(result.upstreamBody).toBe(body);
+    expect(result.redactedRequest?.messages).toEqual([
+      { role: "user", text: "Email [REDACTED_EMAIL]." }
+    ]);
+    expect(result.policy.findings[0]).toMatchObject({
+      kind: "pii",
+      category: "email"
+    });
+  });
+
+  it("observes would-be blocks without blocking upstream forwarding", () => {
+    const body = {
+      model: "gpt-4.1-mini",
+      messages: [{ role: "user", content: "Use key sk-abc123SECRETxyz789." }]
+    } satisfies GatewayRequestInput["body"];
+
+    const result = handleGatewayRequest({
+      ...baseInput,
+      body,
+      rules: [{ category: "api_key", action: "block" }],
+      rolloutMode: "observe"
+    });
+
+    expect(result.decision).toBe("observe");
+    expect(result.observedDecision).toBe("block");
+    expect(result.upstreamBody).toBe(body);
+  });
+
   it("exports gateway types", () => {
-    expectTypeOf<GatewayDecision>().toEqualTypeOf<"allow" | "warn" | "redact" | "block">();
+    expectTypeOf<GatewayDecision>().toEqualTypeOf<
+      "allow" | "warn" | "redact" | "block" | "observe"
+    >();
+    expectTypeOf<HarnessRolloutMode>().toEqualTypeOf<"off" | "observe" | "enforce">();
     expectTypeOf<GatewayRequestInput>().toMatchTypeOf<{
       provider: "openai" | "anthropic";
       body: {
@@ -192,6 +261,7 @@ describe("handleGatewayRequest", () => {
         messages: Array<{ role: string; content: string }>;
       };
       rules: Array<{ category: string; action: GatewayDecision }>;
+      rolloutMode?: HarnessRolloutMode;
       usage?: {
         requestId: string;
         occurredAt: string;
@@ -205,6 +275,8 @@ describe("handleGatewayRequest", () => {
       upstreamBody?: unknown;
       redactedRequest?: unknown;
       usageEvent?: unknown;
+      rolloutMode: HarnessRolloutMode;
+      observedDecision?: GatewayDecision;
     }>();
   });
 });

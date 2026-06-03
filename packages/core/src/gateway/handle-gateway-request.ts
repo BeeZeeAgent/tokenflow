@@ -16,7 +16,9 @@ import type {
   UsageEventInput
 } from "../usage/usage-event.js";
 
-export type GatewayDecision = "allow" | "warn" | "redact" | "block";
+export type GatewayDecision = "allow" | "warn" | "redact" | "block" | "observe";
+
+export type HarnessRolloutMode = "off" | "observe" | "enforce";
 
 export type GatewayUsageInput = Omit<UsageEventInput, "gateway">;
 
@@ -25,11 +27,14 @@ export type GatewayRequestInput = NormalizeRequestInput & {
   retention: RetentionPolicy;
   rules: PolicyRule[];
   defaultAction?: "warn" | "redact" | "block";
+  rolloutMode?: HarnessRolloutMode;
   usage?: GatewayUsageInput;
 };
 
 export type GatewayResponse = {
   decision: GatewayDecision;
+  rolloutMode: HarnessRolloutMode;
+  observedDecision?: GatewayDecision;
   normalizedRequest: NormalizedRequest;
   policy: RequestPolicyDecision;
   upstreamBody?: NormalizeRequestInput["body"];
@@ -38,16 +43,45 @@ export type GatewayResponse = {
 };
 
 export function handleGatewayRequest(input: GatewayRequestInput): GatewayResponse {
+  const rolloutMode = input.rolloutMode ?? "enforce";
   const normalizedRequest = normalizeRequest(input);
+
+  if (rolloutMode === "off") {
+    return withUsageEvent(input, {
+      decision: "allow",
+      rolloutMode,
+      normalizedRequest,
+      policy: {
+        action: "allow",
+        findings: [],
+        reasons: []
+      },
+      upstreamBody: input.body
+    });
+  }
+
   const policy = evaluateRequestPolicy({
     request: normalizedRequest,
     rules: input.rules,
     defaultAction: input.defaultAction
   });
 
+  if (rolloutMode === "observe") {
+    return withUsageEvent(input, {
+      decision: "observe",
+      rolloutMode,
+      observedDecision: policy.action,
+      normalizedRequest,
+      policy,
+      upstreamBody: input.body,
+      redactedRequest: policy.redactedRequest
+    });
+  }
+
   if (policy.action === "block") {
     return withUsageEvent(input, {
       decision: "block",
+      rolloutMode,
       normalizedRequest,
       policy
     });
@@ -56,6 +90,7 @@ export function handleGatewayRequest(input: GatewayRequestInput): GatewayRespons
   if (policy.action === "redact") {
     return withUsageEvent(input, {
       decision: "redact",
+      rolloutMode,
       normalizedRequest,
       policy,
       redactedRequest: policy.redactedRequest
@@ -64,6 +99,7 @@ export function handleGatewayRequest(input: GatewayRequestInput): GatewayRespons
 
   return withUsageEvent(input, {
     decision: policy.action,
+    rolloutMode,
     normalizedRequest,
     policy,
     upstreamBody: input.body

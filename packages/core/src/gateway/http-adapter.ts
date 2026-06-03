@@ -1,6 +1,7 @@
 import { handleGatewayRequest } from "./handle-gateway-request.js";
 import { NormalizeRequestError } from "../normalize/normalize-request.js";
 import type {
+  HarnessRolloutMode,
   GatewayRequestInput,
   GatewayResponse,
   GatewayUsageInput
@@ -27,6 +28,12 @@ export type HttpGatewayAdapterConfig = {
   defaultRetention: RetentionPolicy;
   rules: PolicyRule[];
   defaultAction?: "warn" | "redact" | "block";
+  defaultRolloutMode?: HarnessRolloutMode;
+  harnesses?: Record<string, HttpGatewayHarnessConfig>;
+};
+
+export type HttpGatewayHarnessConfig = {
+  rolloutMode: HarnessRolloutMode;
 };
 
 export type HttpGatewayResponse = {
@@ -81,13 +88,15 @@ export function handleHttpGatewayRequest(
     };
   }
 
+  const metadata = metadataFromHeaders(request.headers, config.defaultMetadata);
   const gateway = tryHandleGatewayRequest({
     provider,
-    metadata: metadataFromHeaders(request.headers, config.defaultMetadata),
+    metadata,
     retention: config.defaultRetention,
     body: request.body as GatewayRequestInput["body"],
     rules: config.rules,
     defaultAction: config.defaultAction,
+    rolloutMode: rolloutModeForHarness(metadata.harness, config),
     usage: usageFromRequest(request)
   });
 
@@ -216,4 +225,15 @@ function usageFromRequest(
       "unknown-request"
     )
   };
+}
+
+function rolloutModeForHarness(
+  harness: string,
+  config: HttpGatewayAdapterConfig
+): HarnessRolloutMode {
+  return (
+    config.harnesses?.[harness]?.rolloutMode ??
+    config.defaultRolloutMode ??
+    "enforce"
+  );
 }

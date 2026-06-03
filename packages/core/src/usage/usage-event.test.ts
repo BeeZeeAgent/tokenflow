@@ -5,6 +5,7 @@ import type { UsageEvent, UsageEventInput } from "./usage-event.js";
 
 const gateway = {
   decision: "warn",
+  rolloutMode: "enforce",
   normalizedRequest: {
     provider: "openai",
     model: "gpt-4.1-mini",
@@ -246,7 +247,7 @@ describe("usage event", () => {
       requestId: string;
       provider: "openai" | "anthropic";
       model: string;
-      decision: "allow" | "warn" | "redact" | "block";
+      decision: "allow" | "warn" | "redact" | "block" | "observe";
       totalTokens: number;
       spike?: {
         triggered: boolean;
