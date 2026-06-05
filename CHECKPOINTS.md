@@ -854,11 +854,23 @@ typecheck passed
 
 ### Checkpoint 21: HTTP Proxy App Skeleton
 
-Status: pending
+Status: verified
 
 Goal:
 
 Create a runnable HTTP proxy app that accepts OpenAI and Anthropic-compatible gateway routes and delegates request handling to the core HTTP adapter.
+
+Completed:
+
+- created `@tokenflow/api`
+- wrote failing API app tests
+- added a framework-free app handler around the core HTTP adapter
+- added a runnable Node HTTP server entrypoint
+- accepted OpenAI-compatible chat completion requests
+- accepted Anthropic-compatible messages requests
+- returned structured unsupported-route and invalid-JSON errors
+- exposed gateway metadata in server JSON responses for measurement during the skeleton phase
+- refreshed pnpm workspace links for the new app package
 
 Files:
 
@@ -867,4 +879,39 @@ apps/api/package.json
 apps/api/src/app.test.ts
 apps/api/src/app.ts
 apps/api/src/server.ts
+pnpm-lock.yaml
+```
+
+Verification:
+
+```bash
+pnpm test
+pnpm typecheck
+```
+
+Result:
+
+```text
+16 test files passed
+108 tests passed
+typecheck passed
+```
+
+## Next Slice
+
+### Checkpoint 22: Upstream Provider Forwarding
+
+Status: pending
+
+Goal:
+
+Forward allowed, observed, and redacted gateway requests to configurable OpenAI and Anthropic upstream base URLs while preserving block responses locally.
+
+Files:
+
+```text
+apps/api/src/app.test.ts
+apps/api/src/app.ts
+apps/api/src/provider-forwarder.test.ts
+apps/api/src/provider-forwarder.ts
 ```
